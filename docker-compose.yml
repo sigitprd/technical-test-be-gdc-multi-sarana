@@ -1,0 +1,31 @@
+# API only. Connects to an existing PostgreSQL configured through DB_* (see .env).
+# To run with a bundled PostgreSQL as well, add docker-compose.db.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.db.yml up -d --build
+services:
+  api:
+    build: .
+    image: task-management-api:latest
+    container_name: task-management-api
+    ports:
+      - "${HTTP_PORT:-8080}:8080"
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      HTTP_PORT: 8080
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DB_HOST: ${DB_HOST_DOCKER:-host.docker.internal}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-task_management}
+      DB_SSLMODE: ${DB_SSLMODE:-disable}
+      DB_AUTO_MIGRATE: ${DB_AUTO_MIGRATE:-true}
+      DB_MAX_CONNS: ${DB_MAX_CONNS:-10}
+      DB_CONNECT_RETRIES: ${DB_CONNECT_RETRIES:-10}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required, copy .env.example to .env}
+      JWT_TTL: ${JWT_TTL:-24h}
+      AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-60}
+      IDEMPOTENCY_TTL: ${IDEMPOTENCY_TTL:-24h}
+      NOTIFIER_SIMULATE_FAILURE: ${NOTIFIER_SIMULATE_FAILURE:-false}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

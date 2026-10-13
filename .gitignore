@@ -1,0 +1,8 @@
+/bin/
+/coverage.out
+/coverage.html
+/coverage.log
+.env
+.DS_Store
+.idea/
+.vscode/

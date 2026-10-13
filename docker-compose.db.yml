@@ -1,0 +1,31 @@
+# Adds a PostgreSQL container and points the API at it.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: task-management-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-task_management}
+    ports:
+      # Published on 5433 by default so it does not clash with a local PostgreSQL.
+      - "${DB_EXPOSE_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
